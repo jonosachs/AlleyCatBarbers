@@ -1,6 +1,8 @@
 using AlleyCatBarbers.Data;
+using AlleyCatBarbers.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Azure.Communication.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,10 +24,34 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+builder.Services.AddSingleton(new EmailClient(builder.Configuration["AzureCommunicationServices:ConnectionString"]));
+builder.Services.AddTransient<IEmailSender, EmailSender>(); // Register the email sender service
+
+
 var app = builder.Build();
+
+
+// Call SeedData method to create roles
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        SeedData.Initialize(services).Wait();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -52,55 +78,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-await CreateRolesAndAdminUser(app.Services);
-
 app.Run();
-
-async Task CreateRolesAndAdminUser(IServiceProvider serviceProvider)
-{
-    using var scope = serviceProvider.CreateScope();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    string adminRole = "Admin";
-
-    // Ensure the Admin role exists
-    if (!await roleManager.RoleExistsAsync(adminRole))
-    {
-        await roleManager.CreateAsync(new IdentityRole(adminRole));
-    }
-
-    // Create the default admin user
-    var adminEmail = "admin@admin.com";
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
-    {
-        var newAdminUser = new IdentityUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-        };
-
-        string adminPassword = "Admin@123"; // Ensure you use a strong password
-        var createAdminUserResult = await userManager.CreateAsync(newAdminUser, adminPassword);
-        if (createAdminUserResult.Succeeded)
-        {
-            await userManager.AddToRoleAsync(newAdminUser, adminRole);
-        }
-        else
-        {
-            // Handle errors (e.g., logging)
-            foreach (var error in createAdminUserResult.Errors)
-            {
-                Console.WriteLine(error.Description);
-            }
-        }
-    }
-    else
-    {
-        // Ensure the user has the Admin role
-        if (!await userManager.IsInRoleAsync(adminUser, adminRole))
-        {
-            await userManager.AddToRoleAsync(adminUser, adminRole);
-        }
-    }
-}

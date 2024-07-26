@@ -1,17 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AlleyCatBarbers.Models
 {
     public class Email
     {
-
-        [Key]
         public int Id { get; set; }
 
-        [Required]
-        [EmailAddress]
-        public string From { get; set; }
-        
         [Required]
         [EmailAddress]
         public string To {  get; set; }
@@ -22,5 +17,15 @@ namespace AlleyCatBarbers.Models
         [Required]
         public string Message { get; set; }
 
+        //public IFormFile Attachment { get; set; }
+
+
+        public Email()
+        {
+            
+        }
+
     }
+
+    
 }
