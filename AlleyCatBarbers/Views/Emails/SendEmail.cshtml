@@ -10,7 +10,8 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="SendEmail" enctype="multipart/form-data" onsubmit="disableSubmitButton()">
+        <form asp-action="SendEmail" enctype="multipart/form-data" data-email-sent="@ViewBag.EmailSent" 
+        onsubmit="disableSubmitButton()">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             @if (ViewBag.Message != null)
@@ -58,14 +59,5 @@
 @section Scripts {
 
     <script src="~/js/emailFormButton.js"></script>
-    <script>
-        @if (ViewBag.EnableButton != null && ViewBag.EnableButton == true)
-        {
-            <text>
-                enableSubmitButton();
-            </text>
-        }
-    </script>
-
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
