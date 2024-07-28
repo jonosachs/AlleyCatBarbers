@@ -125,6 +125,13 @@ namespace AlleyCatBarbers.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    //Assign default role
+                    var defaultRole = "Customer";
+                    if (await _roleManager.RoleExistsAsync(defaultRole))
+                    {
+                        await _userManager.AddToRoleAsync(user, defaultRole);
+                    }
+
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

@@ -16,9 +16,6 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Date)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Type)
             </th>
             <th>
@@ -33,9 +30,6 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Type)
             </td>

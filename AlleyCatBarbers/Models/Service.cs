@@ -14,7 +14,7 @@ namespace AlleyCatBarbers.Models
 
         public Service()
         {
-            Date = DateTime.UtcNow;
+            Date = DateTime.UtcNow.Date;
             Bookings = new List<Booking>();
         }
     }

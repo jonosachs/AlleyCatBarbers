@@ -2,9 +2,18 @@
     var form = document.querySelector('form[data-email-sent]');
     var emailSent = form.getAttribute('data-email-sent');
 
-    if (emailSent) {
+    if (emailSent === "true") {
         markButtonAsSent();
     }
+
+    form.addEventListener('submit', function (event) {
+
+        if (!form.checkValidity()) {
+            enableSubmitButton();
+        }
+
+    }, false);
+
 });
 
 function disableSubmitButton() {

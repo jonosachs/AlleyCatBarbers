@@ -1,9 +1,12 @@
 ﻿using Azure;
 using Azure.Communication.Email;
+using EllipticCurve.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlleyCatBarbers.Services;
+using System;
 
 
 namespace AlleyCatBarbers.Services
@@ -20,17 +23,31 @@ namespace AlleyCatBarbers.Services
             _fromEmail = "DoNotReply@93152d6b-b12c-40af-8ea8-c53636afbabc.azurecomm.net";
         }
 
-        public async Task<(bool EmailSent, string Message)> SendEmailAsync(string email, string subject, string htmlMessage)
+        public async Task<(bool EmailSent, string Message)> SendEmailAsync(string email, string subject, string htmlMessage, EmailAttachment attachment)
         {
+            var emailMessage = new EmailMessage(
+                senderAddress: _fromEmail,
+                recipientAddress: email,
+                content: new EmailContent(subject)
+               );
+
+            (emailMessage.Content.PlainText, emailMessage.Content.Html) = (htmlMessage, htmlMessage);
+
+            if (attachment != null)
+            {                
+                var emailAttachment = new Azure.Communication.Email.EmailAttachment(
+                    attachment.FileName,
+                    "application/octet-stream",
+                    new BinaryData(attachment.Data)
+                    );
+
+                emailMessage.Attachments.Add(emailAttachment);
+            }
+
             try
             {
                 EmailSendOperation emailSendOperation = await _emailClient.SendAsync(
-                WaitUntil.Completed,
-                senderAddress: _fromEmail,
-                recipientAddress: email,
-                subject: subject,
-                htmlContent: htmlMessage,
-                plainTextContent: htmlMessage);
+                WaitUntil.Completed, emailMessage);
 
                 return (true, $"Email queued for delivery. Status = {emailSendOperation.Value.Status}");
             }
@@ -44,10 +61,10 @@ namespace AlleyCatBarbers.Services
             }
         }
 
-        Task IEmailSender.SendEmailWithAttachmentAsync(string email, string subject, string message, byte[] attachmentBytes, string attachmentName)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<(bool EmailSent, string Message)> SendEmailAsync(string email, string subject, string message)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }
 

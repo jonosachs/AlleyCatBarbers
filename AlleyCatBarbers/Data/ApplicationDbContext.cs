@@ -9,7 +9,6 @@ namespace AlleyCatBarbers.Data
     {
         public DbSet<Service> Services { get; set; }
         public DbSet<Booking> Bookings { get; set; }
-        public DbSet<Email> Emails { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -34,6 +33,6 @@ namespace AlleyCatBarbers.Data
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
         }
-        public DbSet<AlleyCatBarbers.Models.Email> Email { get; set; } = default!;
+        
     }
 }

@@ -63,7 +63,7 @@ namespace AlleyCatBarbers.Controllers
 
             if (ModelState.IsValid)
             {
-                service.Date = DateTime.Now;
+                service.Date = DateTime.Now.Date;
                 _context.Add(service);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

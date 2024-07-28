@@ -3,6 +3,7 @@ using AlleyCatBarbers.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Azure.Communication.Email;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,17 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddSingleton(new EmailClient(builder.Configuration["AzureCommunicationServices:ConnectionString"]));
 builder.Services.AddTransient<IEmailSender, EmailSender>(); // Register the email sender service
+
+// Add Google Authentication
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        IConfigurationSection googleAuthNSection =
+            builder.Configuration.GetSection("Authentication:Google");
+
+        options.ClientId = googleAuthNSection["ClientId"];
+        options.ClientSecret = googleAuthNSection["ClientSecret"];
+    });
 
 
 var app = builder.Build();

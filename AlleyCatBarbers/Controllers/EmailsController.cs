@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AlleyCatBarbers.Models;
+using AlleyCatBarbers.ViewModels;
 using AlleyCatBarbers.Services;
-
+using Microsoft.AspNetCore.Authorization;
 
 namespace AlleyCatBarbers.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class EmailsController : Controller
     {
         private readonly IEmailSender _emailSender;
@@ -21,12 +22,42 @@ namespace AlleyCatBarbers.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendEmail(Email model)
+        public async Task<IActionResult> SendEmail(EmailViewModel model)
         {
+
             if (ModelState.IsValid)
             {
-                
-                var (EmailSent, Message) = await _emailSender.SendEmailAsync(model.To, model.Subject, model.Message);
+                EmailAttachment emailAttachment = null;
+                bool EmailSent = false;
+                string Message = null;
+
+                if (model.Attachment != null && model.Attachment.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        await model.Attachment.CopyToAsync(ms);
+                        emailAttachment = new EmailAttachment
+                        {
+                            FileName = Path.GetFileName(model.Attachment.FileName),
+                            Data = ms.ToArray()
+                        };
+                    }
+
+                    (EmailSent, Message) = await _emailSender.SendEmailAsync(
+                        model.To,
+                        model.Subject,
+                        model.Message,
+                        emailAttachment
+                        );
+                }
+                else
+                {
+                    (EmailSent, Message) = await _emailSender.SendEmailAsync(
+                        model.To,
+                        model.Subject,
+                        model.Message
+                        );
+                }
 
                 if (EmailSent)
                 {
@@ -47,6 +78,5 @@ namespace AlleyCatBarbers.Controllers
 
             return View(model);
         }
-
     }
 }

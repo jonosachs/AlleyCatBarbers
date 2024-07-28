@@ -17,7 +17,7 @@ namespace AlleyCatBarbers.Data
             var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Ensure roles exist
-            string[] roleNames = { "Admin", "User" };
+            string[] roleNames = { "Admin", "Customer", "Staff" };
             IdentityResult roleResult;
 
             foreach (var roleName in roleNames)

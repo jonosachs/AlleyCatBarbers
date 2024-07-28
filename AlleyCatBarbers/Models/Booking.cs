@@ -9,6 +9,9 @@ namespace AlleyCatBarbers.Models
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }
+
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         
         [BindNever]
         public string UserId { get; set; }
