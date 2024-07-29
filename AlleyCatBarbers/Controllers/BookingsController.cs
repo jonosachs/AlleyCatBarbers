@@ -17,21 +17,29 @@ namespace AlleyCatBarbers.Controllers
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public BookingsController(ApplicationDbContext context)
+        public BookingsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Bookings
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var applicationDbContext = _context.Bookings
+            
+            var user = await _userManager.GetUserAsync(User);
+            IQueryable<Booking> applicationDbContext = _context.Bookings
                 .Include(b => b.Service)
-                .Include(b => b.User)
-                .Where(b => b.UserId == userId);
+                .Include(b => b.User);
+
+            if (!User.IsInRole("Admin") && !User.IsInRole("Staff"))
+            {
+                applicationDbContext = applicationDbContext
+                    .Where(b => b.UserId == user.Id);
+            }
+
             return View(await applicationDbContext.ToListAsync());
     
         }

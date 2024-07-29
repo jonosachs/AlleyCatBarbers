@@ -1,0 +1,35 @@
+﻿@model IEnumerable<AlleyCatBarbers.Models.Review>
+
+@{
+    ViewData["Title"] = "Reviews";
+}
+
+<h1>Reviews</h1>
+@if (User.IsInRole("Customer"))
+{
+    <p>
+        <a asp-action="Create">Add Review</a>
+    </p>
+}
+@if (Model == null || !Model.Any())
+{
+    <div class="review">
+        <p>No reviews to display</p>
+    </div>
+}
+else
+{
+    @foreach (var review in Model)
+    {
+        <div class="card mb-3 rounded-lg">
+            <div class="card-header bg-dark text-white">
+                @review.User.UserName
+            </div>
+            <div class="card-body bg-light">
+                <p class="card-text">Rating: @review.Rating/5</p>
+                <p class="card-text">Comments: "@review.Comments"</p>
+                <p class="card-text"><small class="text-muted">@review.DateCreated</small></p>
+            </div>
+        </div>
+    }
+}

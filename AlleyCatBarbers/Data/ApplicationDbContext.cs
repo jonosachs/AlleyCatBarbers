@@ -9,6 +9,7 @@ namespace AlleyCatBarbers.Data
     {
         public DbSet<Service> Services { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -31,6 +32,13 @@ namespace AlleyCatBarbers.Data
                 .WithMany()
                 .HasForeignKey(b => b.UserId)
                 .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure the Review-User relationship
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
         
