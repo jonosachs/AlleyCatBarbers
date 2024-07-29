@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AlleyCatBarbers.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin, Staff")]
     public class EmailsController : Controller
     {
         private readonly IEmailSender _emailSender;

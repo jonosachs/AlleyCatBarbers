@@ -16,7 +16,7 @@ namespace AlleyCatBarbers.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
             var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
-            // Ensure roles exist
+            // Create roles if they do not exist
             string[] roleNames = { "Admin", "Customer", "Staff" };
             IdentityResult roleResult;
 
@@ -29,39 +29,46 @@ namespace AlleyCatBarbers.Data
                 }
             }
 
-            // Ensure the admin user exists
-            var adminUser = await userManager.FindByEmailAsync("admin@admin.com");
-            if (adminUser == null)
+            await CreateUser(serviceProvider, "admin@admin.com", "password", "Admin");
+            await CreateUser(serviceProvider, "staff@staff.com", "password", "Staff");
+            await CreateUser(serviceProvider, "customer@customer.com", "password", "Customer");
+
+
+        }
+
+        public static async Task CreateUser(IServiceProvider serviceProvider, string email, string password, string role)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+
+            var user = await userManager.FindByEmailAsync(email);
+            if (user == null)
             {
-                adminUser = new IdentityUser
+                user = new IdentityUser
                 {
-                    UserName = "admin@admin.com",
-                    Email = "admin@admin.com",
+                    UserName = email,
+                    Email = email,
                     EmailConfirmed = true
                 };
 
-                string userPassword = "Admin@123";
-                var createPowerUser = await userManager.CreateAsync(adminUser, userPassword);
-                if (createPowerUser.Succeeded)
+                var createUser = await userManager.CreateAsync(user, password);
+                if (createUser.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    await userManager.AddToRoleAsync(user, role);
                 }
                 else
                 {
-                    throw new Exception("Failed to create new admin user.");
+                    throw new Exception("Failed to create new user.");
                 }
             }
-
-            // Link the admin user to the Admin role
-            var adminRole = await roleManager.FindByNameAsync("Admin");
-            if (!await context.UserRoles.AnyAsync(ur => ur.UserId == adminUser.Id && ur.RoleId == adminRole.Id))
+            else
             {
-                context.UserRoles.Add(new IdentityUserRole<string>
+                // Ensure the user is assigned to the role
+                if (!await userManager.IsInRoleAsync(user, role))
                 {
-                    UserId = adminUser.Id,
-                    RoleId = adminRole.Id
-                });
-                await context.SaveChangesAsync();
+                    await userManager.AddToRoleAsync(user, role);
+                }
             }
         }
     }

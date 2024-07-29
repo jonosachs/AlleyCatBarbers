@@ -13,6 +13,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Password requirements downgraded for testing
+// TODO: upgrade prior to deployment
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.Password.RequireDigit = false;

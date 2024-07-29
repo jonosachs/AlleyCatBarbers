@@ -31,7 +31,7 @@
     </dl>
 </div>
 <div>
-    @if (User.IsInRole("Admin"))
+    @if (User.IsInRole("Admin") | User.IsInRole("Staff"))
     {
         <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
     }

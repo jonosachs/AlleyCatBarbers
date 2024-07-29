@@ -28,7 +28,6 @@ namespace AlleyCatBarbers.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            //var applicationDbContext = _context.Bookings.Include(b => b.Service).Include(b => b.User);
             var applicationDbContext = _context.Bookings
                 .Include(b => b.Service)
                 .Include(b => b.User)
@@ -79,7 +78,7 @@ namespace AlleyCatBarbers.Controllers
                 return View(booking);
             }
 
-            // Retrieve the IdentityUser from the database context
+            // Get the IdentityUser
             booking.User = await _context.Users.FindAsync(userId);
             if (booking.User == null)
             {
@@ -88,7 +87,7 @@ namespace AlleyCatBarbers.Controllers
                 return View(booking);
             }
 
-            // Ensure that the ServiceId is valid
+            // Ensure ServiceId is valid
             booking.Service = await _context.Services.FindAsync(booking.ServiceId);
             if (booking.Service == null)
             {
@@ -97,7 +96,7 @@ namespace AlleyCatBarbers.Controllers
                 return View(booking);
             }
 
-            booking.UserId = userId; // Set the UserId
+            booking.UserId = userId; // Set UserId
 
             // Manually validate the model after setting the properties
             ModelState.Clear();
