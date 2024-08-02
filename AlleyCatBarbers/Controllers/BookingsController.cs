@@ -17,9 +17,9 @@ namespace AlleyCatBarbers.Controllers
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public BookingsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public BookingsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -86,7 +86,7 @@ namespace AlleyCatBarbers.Controllers
                 return View(booking);
             }
 
-            // Get the IdentityUser
+            // Get the ApplicationUser
             booking.User = await _context.Users.FindAsync(userId);
             if (booking.User == null)
             {

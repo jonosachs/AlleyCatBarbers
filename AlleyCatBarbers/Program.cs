@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Azure.Communication.Email;
 using Microsoft.Extensions.DependencyInjection;
+using AlleyCatBarbers.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,11 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Password requirements downgraded for testing
 // TODO: Upgrade password requirements prior to deployment
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;

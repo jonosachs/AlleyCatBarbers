@@ -13,8 +13,10 @@ namespace AlleyCatBarbers.Data
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+
+            context.Database.EnsureCreated();
 
             // Create roles if they do not exist
             string[] roleNames = { "Admin", "Customer", "Staff" };
@@ -29,23 +31,22 @@ namespace AlleyCatBarbers.Data
                 }
             }
 
-            await CreateUser(serviceProvider, "admin@admin.com", "password", "Admin");
-            await CreateUser(serviceProvider, "staff@staff.com", "password", "Staff");
-            await CreateUser(serviceProvider, "customer@customer.com", "password", "Customer");
+            await CreateUser(userManager, "admin@admin.com", "password", "Admin");
+            await CreateUser(userManager, "staff@staff.com", "password", "Staff");
+            await CreateUser(userManager, "customer@customer.com", "password", "Customer");
 
 
         }
 
-        public static async Task CreateUser(IServiceProvider serviceProvider, string email, string password, string role)
+        public static async Task CreateUser(UserManager<ApplicationUser> userManager, string email, 
+            string password, string role)
         {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
-            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            
 
             var user = await userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                user = new IdentityUser
+                user = new ApplicationUser
                 {
                     UserName = email,
                     Email = email,

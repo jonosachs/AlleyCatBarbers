@@ -11,7 +11,7 @@ namespace AlleyCatBarbers.Models
 
         public string UserId { get; set; }
 
-        public IdentityUser User { get; set; }
+        public ApplicationUser User { get; set; }
 
         public int Rating { get; set; }
 

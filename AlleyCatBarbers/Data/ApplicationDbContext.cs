@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using AlleyCatBarbers.ViewModels;
 
 namespace AlleyCatBarbers.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Service> Services { get; set; }
         public DbSet<Booking> Bookings { get; set; }
@@ -40,7 +41,9 @@ namespace AlleyCatBarbers.Data
                 .WithMany()
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
         }
+        
         
     }
 }
