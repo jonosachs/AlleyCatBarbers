@@ -11,5 +11,8 @@ namespace AlleyCatBarbers.ViewModels
         [Required]
         public string Comments { get; set; }
 
+        public DateTime DateCreated { get; set; }
+        public string UserName { get; set; }
+
     }
 }

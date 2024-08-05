@@ -29,9 +29,25 @@ namespace AlleyCatBarbers.Controllers
         // GET: Reviews
         public async Task<IActionResult> List()
         {
-            var applicationDbContext = _context.Reviews
-                .Include(r => r.User);
-            return View(await applicationDbContext.ToListAsync());
+            var reviews = await _context.Reviews
+                .Include(r => r.User)
+                .Select(r => new ReviewViewModel
+                {
+                    Rating = r.Rating,
+                    Comments = r.Comments,
+                    UserName = r.User.UserName,
+                    DateCreated = r.DateCreated
+
+                })
+                .ToListAsync();
+
+            var viewModel = new ReviewListViewModel
+            {
+                Reviews = reviews,
+                AverageRating = reviews.Any() ? ((int)reviews.Average(r => r.Rating)) : 0
+            };
+
+            return View(viewModel);
         }
 
         // GET: Reviews/Create

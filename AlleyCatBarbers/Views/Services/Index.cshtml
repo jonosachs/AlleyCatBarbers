@@ -9,7 +9,9 @@
 @if (User.IsInRole("Admin") | User.IsInRole("Staff"))
 {
     <p>
-        <a asp-action="Create">Create New</a>
+        <form asp-action="Create" method="post">
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
     </p>
 }
 <table class="table">
@@ -43,10 +45,16 @@
                 <td>
                     @if (User.IsInRole("Admin") | User.IsInRole("Staff"))
                     {
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <form asp-action="Edit" asp-route-id="@item.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-secondary btn-sm">Edit</button>
+                        </form>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
                     }
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    <form asp-action="Details" asp-route-id="@item.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-secondary btn-sm">Details</button>
+                    </form>
                 </td>
             
                 <td></td>
