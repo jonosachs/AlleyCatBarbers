@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Azure.Communication.Email;
 using Microsoft.Extensions.DependencyInjection;
 using AlleyCatBarbers.Models;
+using OfficeOpenXml;
+using Elfie.Serialization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,12 +56,19 @@ var app = builder.Build();
 
 
 // Call SeedData method to create roles
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        SeedData.Initialize(services).Wait();
+        var env = services.GetRequiredService<IWebHostEnvironment>();
+        string contentRootPath = env.ContentRootPath;
+        string relativePath = "Data/MOCK_USERS.csv";
+        string csvFilePath = Path.Combine(contentRootPath, relativePath);
+
+        SeedData.Initialize(services, csvFilePath).Wait();
     }
     catch (Exception ex)
     {

@@ -35,7 +35,7 @@ namespace AlleyCatBarbers.Controllers
                 {
                     Rating = r.Rating,
                     Comments = r.Comments,
-                    UserName = r.User.UserName,
+                    FirstName = r.User.FirstName,
                     DateCreated = r.DateCreated
 
                 })

@@ -31,23 +31,41 @@ else
         </h5>
     </div>
 
-    @foreach (var review in Model.Reviews)
-    {
-        <div class="card mb-3 rounded-lg pt-2 col-md-6">
-            <div class="card-body bg-light">
-                <h6 class="card-title">
-                    @review.Rating/5
-                    @for (int i = 0; i < @review.Rating; i++)
-                    {
-                        <i class="fas fa-star"></i>
-                    }
-                </h6>
-                <p class="card-text pt-3 pb-2">"@review.Comments"</p>
-                <p class="card-subtitle mb-2 text-muted">
-                    @review.UserName<br />
-                    <small>@review.DateCreated</small>
-                </p>
-            </div>
-        </div>
-    }
+
+    <div class="container mt-4">
+        <table id="reviewTable" class="table dt-responsive nowrap" style="width:100%">
+            <thead>
+                <tr>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var review in Model.Reviews)
+                {
+                    <tr>
+                        <td>
+                            <div class="card pt-2">
+                                <div class="card-body bg-light">
+                                    <h6 class="card-title">
+                                        @review.Rating/5
+                                        @for (int i = 0; i < @review.Rating; i++)
+                                        {
+                                            <i class="fas fa-star"></i>
+                                        }
+                                    </h6>
+                                    <p class="card-text pt-3 pb-2">"@review.Comments"</p>
+                                    <p class="card-subtitle mb-2 text-muted">
+                                        @review.FirstName<br />
+                                        <small>@review.DateCreated</small>
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
 }
+
