@@ -68,6 +68,15 @@ namespace AlleyCatBarbers.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            // Log the errors
+            var errors = ModelState.Values.SelectMany(v => v.Errors);
+            foreach (var error in errors)
+            {
+                Console.WriteLine(error.ErrorMessage);
+            }
+
+
             return View(service);
         }
 

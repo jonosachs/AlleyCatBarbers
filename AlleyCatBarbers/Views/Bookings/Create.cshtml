@@ -1,4 +1,4 @@
-﻿@model AlleyCatBarbers.Models.Booking
+﻿@model AlleyCatBarbers.ViewModels.BookingViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -10,16 +10,26 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" type="datetime-local" id="bookingDate" />
+                <label asp-for="ServiceId" class="control-label">Service</label>
+                <select asp-for="ServiceId" id="serviceId" class="form-control" asp-items="ViewBag.ServiceId">
+                    <option value="">Choose..</option>
+                </select>
+                <span asp-validation-for="ServiceId" class="text-danger"></span>
+            </div>
+            <div class="form-group pt-2">
+                <label asp-for="Date" class="control-label">Select Date</label>
+                <input type="text" asp-for="Date" id="bookingDate" class="form-control" />
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
             <div class="form-group pt-2">
-                <label asp-for="ServiceId" class="control-label">Service</label>
-                <select asp-for="ServiceId" class="form-control" asp-items="ViewBag.ServiceId"></select>
+                <label asp-for="TimeSlot" class="control-label">Select A Time</label>
+                <select asp-for="TimeSlot" id="timeSlot" class="form-control" asp-items="ViewBag.TimeSlots" disabled>
+                    <option value="">Choose..</option>
+                </select>
+                <span asp-validation-for="TimeSlot" class="text-danger"></span>
             </div>
             <div class="form-group pt-3">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -32,10 +42,18 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+
+
 @section Scripts {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-    <script src="~/js/bookingRestrictions.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+    <script src="~/js/bookingSelectors.js"></script>
+
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+
+    
+

@@ -2,17 +2,19 @@
 using Microsoft.VisualBasic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.ComponentModel.DataAnnotations;
 
 namespace AlleyCatBarbers.Models
 {
     public class Booking
     {
         public int Id { get; set; }
+        
+        
+        [DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
-        // TODO: Add start-end time for bookings
-        //public DateTime StartTime { get; set; }
-        //public DateTime EndTime { get; set; }
+        public TimeOnly TimeSlot { get; set; }
         
         [BindNever]
         public string UserId { get; set; }
@@ -25,9 +27,6 @@ namespace AlleyCatBarbers.Models
         [BindNever]
         public Service Service { get; set; }
 
-        public Booking()
-        {
-            Date = DateTime.UtcNow;
-        }
+        
     }
 }

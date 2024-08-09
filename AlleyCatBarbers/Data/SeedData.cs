@@ -35,23 +35,30 @@ namespace AlleyCatBarbers.Data
 
             if (!userManager.Users.Any())
             { 
-                //Create Admin/Staff
+                //Create users
                 await CreateUser(userManager, "admin@admin.com", "password", "Admin", "John", "Doe", "0400 000 000", new DateOnly(2000, 1, 1));
                 await CreateUser(userManager, "staff@staff.com", "password", "Staff", "Jane", "Doe", "0400 000 000", new DateOnly(2000, 1, 1));
+                await CreateUser(userManager, "customer@customer.com", "password", "Customer", "Jack", "Doe", "0400 000 000", new DateOnly(2000, 1, 1));
 
-                //Create Customers
-                var userRecords = SpreadsheetReader.ReadUserRecords(spreadsheetPath);
+                //Create multiple customers
+                //var userRecords = SpreadsheetReader.ReadUserRecords(spreadsheetPath);
 
-                foreach (var userRecord in userRecords)
-                {
-                    await CreateUser(userManager, userRecord.Email, userRecord.Password, userRecord.Role, userRecord.FirstName, userRecord.LastName, userRecord.PhoneNumber, userRecord.DateOfBirth);
-                }
+                //foreach (var userRecord in userRecords)
+                //{
+                //    await CreateUser(userManager, userRecord.Email, userRecord.Password, userRecord.Role, userRecord.FirstName, userRecord.LastName, userRecord.PhoneNumber, userRecord.DateOfBirth);
+                //}
             }
 
             //Create reviews
             if (!context.Reviews.Any())
             {
                 await CreateReviews(context, userManager);
+            }
+
+            //Create services
+            if (!context.Services.Any())
+            {
+                await CreateServices(context, userManager);
             }
 
         }
@@ -109,15 +116,30 @@ namespace AlleyCatBarbers.Data
 
             var random = new Random();
             var reviews = new List<Review>
-        {
-            new Review { Comments = "Great service!", Rating = 5, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id },
-            new Review { Comments = "Good service.", Rating = 4, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id },
-            new Review { Comments = "Average experience.", Rating = 3, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id }
-        };
+            {
+                new Review { Comments = "Great service!", Rating = 5, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id },
+                new Review { Comments = "Good service.", Rating = 4, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id },
+                new Review { Comments = "Average experience.", Rating = 3, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id }
+            };
 
             context.Reviews.AddRange(reviews);
             await context.SaveChangesAsync();
         }
+
+
+        public static async Task CreateServices(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        {
+            var services = new List<Service>
+            {
+                new Service { Type = "Haircut", Price = 55, Description = "Standard haircut" },
+                new Service { Type = "Beard Trim", Price = 35, Description = "Beard trim" }
+            
+            };
+
+            context.Services.AddRange(services);
+            await context.SaveChangesAsync();
+        }
+
 
 
     }

@@ -6,10 +6,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AlleyCatBarbers.Data;
-using AlleyCatBarbers.Models;
+using AlleyCatBarbers.ViewModels;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using AlleyCatBarbers.Models;
+using static System.Reflection.Metadata.BlobBuilder;
+using Microsoft.CodeAnalysis.Scripting;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using SendGrid.Helpers.Mail;
+using Microsoft.Extensions.Logging;
+
 
 namespace AlleyCatBarbers.Controllers
 {
@@ -18,17 +26,19 @@ namespace AlleyCatBarbers.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<BookingsController> _logger;
 
-        public BookingsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public BookingsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<BookingsController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
 
         // GET: Bookings
         public async Task<IActionResult> Index()
         {
-            
+
             var user = await _userManager.GetUserAsync(User);
             IQueryable<Booking> applicationDbContext = _context.Bookings
                 .Include(b => b.Service)
@@ -41,8 +51,10 @@ namespace AlleyCatBarbers.Controllers
             }
 
             return View(await applicationDbContext.ToListAsync());
-    
+
         }
+
+       
 
         // GET: Bookings/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -65,65 +77,61 @@ namespace AlleyCatBarbers.Controllers
         }
 
         // GET: Bookings/Create
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type");
+            
             return View();
         }
 
         // POST: Bookings/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Date,ServiceId")] Booking booking)
+        public async Task<IActionResult> Create([Bind("Id,Date,TimeSlot,ServiceId")] BookingViewModel bookingViewModel)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
             {
-                ModelState.AddModelError("", "User is not logged in.");
-                ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type", booking.ServiceId);
-                return View(booking);
+                ModelState.AddModelError(string.Empty, "User is not authenticated.");
+            }
+            else
+            {
+                _logger.LogInformation("User authenticated: {UserId}", user.Id);
+                bookingViewModel.UserId = user.Id;
             }
 
-            // Get the ApplicationUser
-            booking.User = await _context.Users.FindAsync(userId);
-            if (booking.User == null)
-            {
-                ModelState.AddModelError("", "User not found.");
-                ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type", booking.ServiceId);
-                return View(booking);
-            }
-
-            // Ensure ServiceId is valid
-            booking.Service = await _context.Services.FindAsync(booking.ServiceId);
-            if (booking.Service == null)
-            {
-                ModelState.AddModelError("ServiceId", "Invalid service selected.");
-                ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type", booking.ServiceId);
-                return View(booking);
-            }
-
-            booking.UserId = userId; // Set UserId
-
-            // Manually validate the model after setting the properties
-            ModelState.Clear();
-            TryValidateModel(booking);
+           
 
             if (ModelState.IsValid)
             {
+                var booking = new Booking
+                {
+                    Date = bookingViewModel.Date,
+                    TimeSlot = TimeOnly.Parse(bookingViewModel.TimeSlot),
+                    ServiceId = bookingViewModel.ServiceId,
+                    UserId = user.Id
+                };
+
                 _context.Add(booking);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Booking created successfully: {BookingId}", booking.Id);
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type", booking.ServiceId);
-            return View(booking);
+            ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type", bookingViewModel.ServiceId);
+            //ViewData["TimeSlots"] = new SelectList(GetAvailableTimeSlots(bookingViewModel.Date));
+
+            _logger.LogWarning("ModelState is not valid. Errors: {Errors}", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            return View(bookingViewModel);
         }
+
 
         // GET: Bookings/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+
             if (id == null)
             {
                 return NotFound();
@@ -134,8 +142,23 @@ namespace AlleyCatBarbers.Controllers
             {
                 return NotFound();
             }
-            ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type", booking.ServiceId);
-            return View(booking);
+
+            
+            
+
+            // Pass the booking details to the view
+            var bookingViewModel = new BookingViewModel
+            {
+                Id = booking.Id,
+                Date = booking.Date,
+                TimeSlot = booking.TimeSlot.ToString("h:mm tt"),
+                ServiceId = booking.ServiceId
+            };
+
+            // Populate ViewBag with data to prepopulate the dropdowns
+            ViewBag.ServiceId = new SelectList(_context.Services, "Id", "Type", booking.ServiceId);
+
+            return View(bookingViewModel);
         }
 
         // POST: Bookings/Edit/5
@@ -143,35 +166,62 @@ namespace AlleyCatBarbers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Date,UserId,ServiceId")] Booking booking)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Date,TimeSlot,ServiceId")] BookingViewModel bookingViewModel)
         {
-            if (id != booking.Id)
+
+            if (id != bookingViewModel.Id)
+            {
+                return BadRequest();
+            }
+
+            var booking = await _context.Bookings.FindAsync(id);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (booking == null)
+            {
+                _logger.LogWarning("No booking found with ID {Id}", id);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Booking found: {Booking}", booking);
+
+            if (user == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+
+            if (string.IsNullOrEmpty(bookingViewModel.TimeSlot))
             {
-                try
-                {
-                    _context.Update(booking);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookingExists(booking.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                ModelState.AddModelError("TimeSlot", "Time slot is required.");
+                ViewBag.ServiceId = new SelectList(_context.Services, "Id", "Type", bookingViewModel.ServiceId);
+                return View(bookingViewModel);
+            }
+
+            
+
+            try
+            {
+                // Update the booking record with new values
+                _logger.LogInformation("----------UPDATING BOOKING----------");
+                booking.Date = bookingViewModel.Date;
+                booking.TimeSlot = TimeOnly.ParseExact(bookingViewModel.TimeSlot, "h:mm tt", null);
+                booking.ServiceId = bookingViewModel.ServiceId;
+
+                
+
+                // Save the changes to the database
+                _context.Update(booking);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type", booking.ServiceId);
-            return View(booking);
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception caught : {ex.Message}");
+                ViewBag.ServiceId = new SelectList(_context.Services, "Id", "Type", bookingViewModel.ServiceId);
+                return View(bookingViewModel);
+            }
+        
         }
 
         // GET: Bookings/Delete/5
@@ -213,5 +263,54 @@ namespace AlleyCatBarbers.Controllers
         {
             return _context.Bookings.Any(e => e.Id == id);
         }
+
+        [HttpGet]
+        public IActionResult GetAvailableTimeSlots(DateTime date, string currentBookingTimeSlot)
+        {
+            // The 'date' parameter is automatically bound to the 'dateText' query parameter
+            try
+            {
+                // Retrieve and process bookings for the date
+                var bookings = _context.Bookings
+                                       .Where(b => b.Date.Date == date.Date)
+                                       //.Select(b => b.TimeSlot)
+                                       .ToList();
+
+                // Define all possible time slots
+                var allTimeSlots = new List<string>
+                {
+                    "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM",
+                    "3:00 PM", "4:00 PM", "5:00 PM"
+                };
+
+
+                // Convert booked times to strings for comparison
+                var bookedTimeSlots = bookings.Select(b => b.TimeSlot.ToString()).ToList();
+
+                if (!string.IsNullOrEmpty(currentBookingTimeSlot))
+                {
+                    bookedTimeSlots.Remove(currentBookingTimeSlot);
+                }
+
+                // Remove booked time slots from the list of all time slots
+                var availableTimeSlots = allTimeSlots.Except(bookedTimeSlots, StringComparer.OrdinalIgnoreCase).ToList();
+
+                // Logging for debugging
+                _logger.LogInformation("Booked Time Slots: {TimeSlots}", string.Join(", ", bookedTimeSlots));
+                _logger.LogInformation("Available Time Slots: {TimeSlots}", string.Join(", ", availableTimeSlots));
+
+                // Return available time slots as JSON
+                return Ok(availableTimeSlots);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving available time slots for date: {date}", date);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
     }
 }
+
+

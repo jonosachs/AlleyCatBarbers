@@ -35,3 +35,9 @@ body {
 #main-content {
     display: none;
 }
+
+
+.ui-datepicker-unselectable .ui-state-disabled {
+    text-decoration: line-through;
+    color: #c0c0c0; /* Lighter color for disabled dates */
+}
