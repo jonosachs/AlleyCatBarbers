@@ -39,14 +39,14 @@
                 <td>
                     @if (User.IsInRole("Admin") | User.IsInRole("Staff"))
                     {
-                        <form asp-action="Edit" asp-route-id="@item.Id" method="post" class="d-inline">
+                        <form asp-action="Edit" asp-route-id="@item.Id" method="get" class="d-inline">
                             <button type="submit" class="btn btn-secondary btn-sm">Edit</button>
                         </form>
                         <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>
                     }
-                    <form asp-action="Details" asp-route-id="@item.Id" method="post" class="d-inline">
+                    <form asp-action="Details" asp-route-id="@item.Id" method="get" class="d-inline">
                         <button type="submit" class="btn btn-secondary btn-sm">Details</button>
                     </form>
                 </td>

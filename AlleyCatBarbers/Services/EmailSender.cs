@@ -49,11 +49,11 @@ namespace AlleyCatBarbers.Services
                 EmailSendOperation emailSendOperation = await _emailClient.SendAsync(
                 WaitUntil.Completed, emailMessage);
 
-                return (true, $"Email queued for delivery. Status = {emailSendOperation.Value.Status}");
+                return (true, $"{emailSendOperation.Value.Status}");
             }
             catch (RequestFailedException ex)
             {
-                return (false, $"Email send failed. ErrorCode: {ex.ErrorCode}");
+                return (false, $"{ex.ErrorCode}");
             }
             catch (Exception ex)
             {
@@ -61,10 +61,6 @@ namespace AlleyCatBarbers.Services
             }
         }
 
-        //public Task<(bool EmailSent, string Message)> SendEmailAsync(string email, string subject, string message)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }
 

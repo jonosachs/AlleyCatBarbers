@@ -7,6 +7,9 @@ using AlleyCatBarbers.Models;
 using Microsoft.EntityFrameworkCore;
 using AlleyCatBarbers.Services;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
+using SendGrid.Helpers.Mail;
 
 namespace AlleyCatBarbers.Data
 {
@@ -20,22 +23,23 @@ namespace AlleyCatBarbers.Data
 
             context.Database.EnsureCreated();
 
-            // Create roles if they do not exist
-            string[] roleNames = { "Admin", "Customer", "Staff" };
-            IdentityResult roleResult;
-
-            foreach (var roleName in roleNames)
+            // Create roles
+            if (!context.Roles.Any())
             {
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
+                string[] roleNames = { "Admin", "Customer", "Staff" };
+                IdentityResult roleResult;
+
+                foreach (var roleName in roleNames)
                 {
                     roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
+
                 }
             }
 
+            //Create users
             if (!userManager.Users.Any())
             { 
-                //Create users
+                
                 await CreateUser(userManager, "admin@admin.com", "password", "Admin", "John", "Doe", "0400 000 000", new DateOnly(2000, 1, 1));
                 await CreateUser(userManager, "staff@staff.com", "password", "Staff", "Jane", "Doe", "0400 000 000", new DateOnly(2000, 1, 1));
                 await CreateUser(userManager, "customer@customer.com", "password", "Customer", "Jack", "Doe", "0400 000 000", new DateOnly(2000, 1, 1));
@@ -59,6 +63,12 @@ namespace AlleyCatBarbers.Data
             if (!context.Services.Any())
             {
                 await CreateServices(context, userManager);
+            }
+
+            //Create bookings
+            if (!context.Bookings.Any())
+            {
+                await CreateBookings(context, userManager);
             }
 
         }
@@ -107,19 +117,12 @@ namespace AlleyCatBarbers.Data
         public static async Task CreateReviews(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
 
-            var users = userManager.Users.ToList();
+            var customer = await userManager.FindByNameAsync("customer@customer.com");
 
-            if (!users.Any())
-            {
-                throw new Exception("No users to assign reviews");
-            }
-
-            var random = new Random();
             var reviews = new List<Review>
             {
-                new Review { Comments = "Great service!", Rating = 5, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id },
-                new Review { Comments = "Good service.", Rating = 4, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id },
-                new Review { Comments = "Average experience.", Rating = 3, DateCreated = DateTime.Now, UserId = users[random.Next(users.Count)].Id }
+                new Review { Comments = "Great service!", Rating = 5, DateCreated = DateTime.Now, UserId = customer.Id },
+                new Review { Comments = "Good barbers..", Rating = 4, DateCreated = DateTime.Now, UserId = customer.Id },
             };
 
             context.Reviews.AddRange(reviews);
@@ -139,6 +142,24 @@ namespace AlleyCatBarbers.Data
             context.Services.AddRange(services);
             await context.SaveChangesAsync();
         }
+
+        public static async Task CreateBookings(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        {
+            var customer = await userManager.FindByNameAsync("customer@customer.com");
+            var haircut = await context.Services.FirstOrDefaultAsync(s => s.Type == "Haircut");
+
+            var bookings = new List<Booking>
+            {
+                new Booking { Date = new DateTime(2024,08,20), TimeSlot = new TimeOnly(10,00), ServiceId = haircut.Id, UserId = customer.Id },
+                new Booking { Date = new DateTime(2024,08,20), TimeSlot = new TimeOnly(15,00), ServiceId = haircut.Id, UserId = customer.Id }
+
+            };
+
+            context.Bookings.AddRange(bookings);
+            await context.SaveChangesAsync();
+        }
+
+        
 
 
 

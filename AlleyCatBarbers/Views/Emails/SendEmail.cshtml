@@ -11,20 +11,28 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-action="SendEmail" enctype="multipart/form-data"
-              data-email-sent="@ViewBag.EmailSent" onsubmit="disableSubmitButton()" novalidate>
+              data-email-sent="@ViewBag.EmailSent" novalidate>
 
 
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             
             @if (ViewBag.Message != null)
             {
-                // TODO: Update email success message
                 <div class="alert alert-success">@ViewBag.Message</div>
+                <script>
+                    window.onload = function() {
+                        var button = document.getElementById('submitButton');
+                        if (button) {
+                            button.disabled = true;
+                        } else {
+                            console.error("Submit button not found.");
+                        }
+                    };
+                </script>
             }
 
             @if (ViewBag.Error != null)
             {
-                // TODO: Update email fail message
                 <div class="alert alert-danger" style="word-wrap: break-word;">@ViewBag.Error</div>
             }
 
@@ -64,7 +72,10 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/emailFormButton.js"></script>
+
+    <script src="/js/emailWaitingSpinner.js"></script>
+    
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

@@ -6,6 +6,16 @@
 }
 
 <h1>Users</h1>
+
+@if (User.IsInRole("Admin") | User.IsInRole("Staff"))
+{
+    <p>
+        <form asp-action="Create" method="post">
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </p>
+}
+
 <div class="table-responsive">
     <table id="userTable" class="table table-striped nowrap" style=width:100%>
         <thead>
@@ -16,6 +26,7 @@
                 <th>Phone</th>
                 <th>DOB</th>
                 <th>Role</th>
+                <th>Edit</th>
             </tr>
         </thead>
         <tbody>
@@ -27,6 +38,17 @@
                     <td>@Html.DisplayFor(modelItem => item.PhoneNumber)</td>
                     <td>@Html.DisplayFor(modelItem => item.DateOfBirth)</td>
                     <td>@Html.DisplayFor(modelItem => item.Roles)</td>
+                    <td>
+                        <form asp-action="Edit" asp-route-id="@item.Id" method="get" class="d-inline">
+                            <button type="submit" class="btn btn-secondary btn-sm">Edit</button>
+                        </form>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                        <form asp-action="Details" asp-route-id="@item.Id" method="get" class="d-inline">
+                            <button type="submit" class="btn btn-secondary btn-sm">Details</button>
+                        </form>
+                    </td>
                 </tr>}
         </tbody>
     </table>

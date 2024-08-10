@@ -1,37 +1,38 @@
-﻿$(document).ready(function () {
+﻿// Set actions for Booking fields
+$(document).ready(function () {
     var serviceIdDropdown = $('#serviceId');
     var datePicker = $('#bookingDate');
     var timeSlotDropdown = $('#timeSlot');
     var formMode = $('#editBookingForm').data('mode');
 
-    // Initialize dropdowns
+    // Check if editing an existing booking
     if (formMode === 'edit') {
         console.log("Edit mode");
 
-        // Set the date and time values from hidden fields
+        // Get existing booking date and time values from hidden fields
         var hiddenDate = $('#hiddenDate').val();
         var hiddenTimeSlot = $('#hiddenTimeSlot').val();
 
         if (hiddenDate) {
             datePicker.val(hiddenDate);
-            datePicker.datepicker("setDate", hiddenDate);  // Ensure the datepicker is updated
+            datePicker.datepicker("setDate", hiddenDate);  
         }
 
         if (hiddenTimeSlot) {
             timeSlotDropdown.val(hiddenTimeSlot);
             fetchTimeSlots(hiddenDate)
-            console.log("Setting time slot to:", hiddenTimeSlot); // Debugging
+  
         }
 
         datePicker.prop('disabled', false);
         timeSlotDropdown.prop('disabled', false);
-    } else {
+    } else {    // Otherwise enable selections sequentially for new booking
         datePicker.val('Choose..');
         datePicker.prop('disabled', true);
         timeSlotDropdown.prop('disabled', true);
     }
 
-    // Event handler for service dropdown change
+    // Enable date picker after service selection
     serviceIdDropdown.change(function () {
 
         var selectedService = $(this).val();
@@ -44,11 +45,11 @@
 
     });
 
-    // Initialize date picker
+    // Set date picker restrictions
     datePicker.datepicker({
         dateFormat: 'yy-mm-dd',
-        minDate: 0, // Today
-        maxDate: '+30D', // 30 days from today
+        minDate: 0, 
+        maxDate: '+30D',
         beforeShowDay: function (date) {
             var today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -61,35 +62,39 @@
                 return [true, "", ""];
             }
         },
+
+        // Get available time slots after date selected
         onSelect: function (dateText) {
             fetchTimeSlots(dateText);
         }
     });
 
+    // Get available time slots
     function fetchTimeSlots(dateText) {
 
         $.ajax({
-            url: '/Bookings/GetAvailableTimeSlots',
+            url: '/Bookings/GetAvailableTimeSlots', // Booking controller method
             type: 'GET',
             data: { date: dateText, currentBookingTimeSlot: hiddenTimeSlot },
             success: function (data) {
                     
                 timeSlotDropdown.empty();
-                timeSlotDropdown.append('<option value="">Choose..</option>');
-                    
+                timeSlotDropdown.append('<option value="">Choose..</option>'); 
+
+                // Populate time dropdown with available times
                 $.each(data, function (index, value) {
                     timeSlotDropdown.append('<option value="' + value + '">' + value + '</option>');
                 });
 
                 if (formMode === 'edit') {
-                    timeSlotDropdown.val(hiddenTimeSlot);
+                    timeSlotDropdown.val(hiddenTimeSlot); // Set to existing booking time if editing
                 }
 
-                timeSlotDropdown.prop('disabled', false); // Enable the dropdown after populating
+                timeSlotDropdown.prop('disabled', false); // Enable dropdown after populating
             },
             error: function (xhr, status, error) {
                 console.error("Error fetching time slots: ", error);
-                timeSlotDropdown.prop('disabled', true); // Keep it disabled if there's an error
+                timeSlotDropdown.prop('disabled', true); // Keep disabled if error
             }
         });
     }

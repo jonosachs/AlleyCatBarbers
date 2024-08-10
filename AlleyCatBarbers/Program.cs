@@ -32,6 +32,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddControllersWithViews();
@@ -55,7 +56,7 @@ builder.Services.AddAuthentication()
 var app = builder.Build();
 
 
-// Call SeedData method to create roles
+// Call SeedData method
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 using (var scope = app.Services.CreateScope())
