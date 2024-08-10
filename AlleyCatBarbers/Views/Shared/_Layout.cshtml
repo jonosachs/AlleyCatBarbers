@@ -6,12 +6,12 @@
     <title>@ViewData["Title"] - AlleyCatBarbers</title>
     
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="/AlleyCatBarbers.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="@Url.Content("~/lib/bootstrap/dist/css/bootstrap.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
+    <link rel="stylesheet" href="@Url.Content("~/AlleyCatBarbers.styles.css")" asp-append-version="true" />
 
     <!-- JQuery UI -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
 
     <!-- Datatables -->
     <link rel="preload" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -78,11 +78,13 @@
 
 
     <!-- JQuery -->
-    <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="@Url.Content("~/lib/jquery/dist/jquery.min.js")"></script>
+
+    <!-- JQuery UI -->
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
 
     <!-- Bootstrap -->
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="@Url.Content("~/lib/bootstrap/dist/js/bootstrap.bundle.min.js")"></script>
     
     <!-- Datatables -->
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js" defer></script>
@@ -91,12 +93,12 @@
     <script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap5.min.js" defer></script>
     
     <!-- JQuery Validation -->
-    <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="@Url.Content("~/lib/jquery-validation/dist/jquery.validate.min.js")"></script>
+    <script src="@Url.Content("~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js")"></script>
 
     <!-- Custom -->
-    <script src="/js/site.js" asp-append-version="true"></script>
-    <script src="/js/dataTables.js"></script>
+    <script src="@Url.Content("~/js/site.js")" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/dataTables.js")"></script>
     
     <!-- Hide spinner and show content once content loaded -->
     <script>

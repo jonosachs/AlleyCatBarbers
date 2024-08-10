@@ -1,5 +1,4 @@
 ﻿// Set actions for Booking fields
-$(document).ready(function () {
     var serviceIdDropdown = $('#serviceId');
     var datePicker = $('#bookingDate');
     var timeSlotDropdown = $('#timeSlot');
@@ -100,4 +99,4 @@ $(document).ready(function () {
     }
 
 
-});
+
