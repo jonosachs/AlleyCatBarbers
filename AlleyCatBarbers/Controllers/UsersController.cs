@@ -37,10 +37,13 @@ namespace AlleyCatBarbers.Controllers
         // GET: Users
         public async Task<IActionResult> Index()
         {
+            // Get list of all users
             var users = await _userManager.Users.ToListAsync();
+            
+            // Instantiate new list of ViewModels to store User details
             var userViewModels = new List<UserViewModel>();
             
-
+            // Parse each User details to a new UserViewModel and add to list
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
@@ -58,6 +61,7 @@ namespace AlleyCatBarbers.Controllers
                 userViewModels.Add(userViewModel);
             }
 
+            // Return the list of UserViewModels
             return View(userViewModels);
         }
 
@@ -79,6 +83,7 @@ namespace AlleyCatBarbers.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
 
+            // Populate UserViewModel with User data
             var model = new UserViewModel
             {
                 Id = user.Id,
@@ -87,7 +92,7 @@ namespace AlleyCatBarbers.Controllers
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 DateOfBirth = user.DateOfBirth,
-                Roles = string.Join(", ", roles)
+                Roles = string.Join(", ", roles) // Include roles (may be multiple) as String 
             };
 
             return View(model);
@@ -96,7 +101,7 @@ namespace AlleyCatBarbers.Controllers
         // GET: User/Create
         public IActionResult Create()
         {
-            _logger.LogInformation("CREATE METHOD TRIGGERED");
+            
             return View();
         }
 
@@ -106,12 +111,14 @@ namespace AlleyCatBarbers.Controllers
         public async Task<IActionResult> Create(UserViewModel model)
         {
 
+            // Remove Id from ViewModel as set automatically when creating new User
             ModelState.Remove(nameof(model.Id));
 
             try
             {
                 if (ModelState.IsValid)
                 {
+                    /// Populate new User with details from model
                     var user = new ApplicationUser
                     {
                         UserName = model.Email,
@@ -122,17 +129,18 @@ namespace AlleyCatBarbers.Controllers
                         DateOfBirth = model.DateOfBirth
                     };
 
-                    // Default password
+                    // Create user with default password
                     var result = await _userManager.CreateAsync(user, "password");
 
                     if (result.Succeeded)
                     {
 
-                        model.Id = user.Id;
+                        //model.Id = user.Id;
 
+                        // Split string of roles into new list
                         var roles = model.Roles.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        // Assign roles
+                        // Assign roles to User
                         if (roles != null && roles.Length > 0)
                         {
                             await _userManager.AddToRolesAsync(user, roles);
@@ -149,9 +157,7 @@ namespace AlleyCatBarbers.Controllers
             } 
             catch (Exception ex)
             {
-                _logger.LogError(ex, "ERROR");
                 ModelState.AddModelError(string.Empty, "An unexpected error occurred while creating the user. Please try again.");
-
             }
 
             if (!ModelState.IsValid)
@@ -159,8 +165,6 @@ namespace AlleyCatBarbers.Controllers
                 _logger.LogWarning("Model state is invalid. Errors: {Errors}",
                     string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
             }
-
-            _logger.LogInformation("ERROR");
 
             return View(model);
         }
@@ -182,7 +186,6 @@ namespace AlleyCatBarbers.Controllers
             var userRoles = await _userManager.GetRolesAsync(user);
             var roles = new List<string> { string.Join(", ", userRoles) };
 
-            _logger.LogInformation("FORMATTED ROLES {roles}", roles);
 
             var model = new UserViewModel
             {
@@ -209,23 +212,27 @@ namespace AlleyCatBarbers.Controllers
             }
 
             if (ModelState.IsValid)
-            {
+            {   
+                // Get the user for editing
                 var user = await _userManager.FindByIdAsync(id);
+                
                 if (user == null)
                 {
                     return NotFound();
                 }
 
+                // Parse edited details from the UserViewModel to the User
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.Email = model.Email;
                 user.PhoneNumber = model.PhoneNumber;
                 user.DateOfBirth = model.DateOfBirth;
-
+                
+                // Update the user details
                 var result = await _userManager.UpdateAsync(user);
                 if (result.Succeeded)
                 {
-
+                    // Get any role changes
                     var roles = model.Roles.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
                     foreach (var role in roles)
@@ -233,7 +240,7 @@ namespace AlleyCatBarbers.Controllers
                         if (!await _roleManager.RoleExistsAsync(role))
                         {
                             ModelState.AddModelError(string.Empty, $"The role '{role}' does not exist.");
-                            return View(model); // Return the view with the model errors
+                            return View(model); // Return view with model errors
                         }
                     }
 

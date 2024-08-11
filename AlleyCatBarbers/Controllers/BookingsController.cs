@@ -44,6 +44,7 @@ namespace AlleyCatBarbers.Controllers
                 .Include(b => b.Service)
                 .Include(b => b.User);
 
+            //Restrict viewing of bookings to creator if user is not Admin or Staff
             if (!User.IsInRole("Admin") && !User.IsInRole("Staff"))
             {
                 applicationDbContext = applicationDbContext
@@ -121,9 +122,9 @@ namespace AlleyCatBarbers.Controllers
             }
 
             ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Type", bookingViewModel.ServiceId);
-            //ViewData["TimeSlots"] = new SelectList(GetAvailableTimeSlots(bookingViewModel.Date));
-
+            
             _logger.LogWarning("ModelState is not valid. Errors: {Errors}", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            
             return View(bookingViewModel);
         }
 
@@ -143,10 +144,8 @@ namespace AlleyCatBarbers.Controllers
                 return NotFound();
             }
 
-            
-            
 
-            // Pass the booking details to the view
+            // Pass the booking details to the ViewModel
             var bookingViewModel = new BookingViewModel
             {
                 Id = booking.Id,
@@ -202,15 +201,11 @@ namespace AlleyCatBarbers.Controllers
 
             try
             {
-                // Update the booking record with new values
-                _logger.LogInformation("----------UPDATING BOOKING----------");
+                // Update booking record with new values from ViewModel
                 booking.Date = bookingViewModel.Date;
                 booking.TimeSlot = TimeOnly.ParseExact(bookingViewModel.TimeSlot, "h:mm tt", null);
                 booking.ServiceId = bookingViewModel.ServiceId;
 
-                
-
-                // Save the changes to the database
                 _context.Update(booking);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -267,10 +262,10 @@ namespace AlleyCatBarbers.Controllers
         [HttpGet]
         public IActionResult GetAvailableTimeSlots(DateTime date, string currentBookingTimeSlot)
         {
-            // The 'date' parameter is automatically bound to the 'dateText' query parameter
+            
             try
             {
-                // Retrieve and process bookings for the date
+                // Get existing bookings for the given date
                 var bookings = _context.Bookings
                                        .Where(b => b.Date.Date == date.Date)
                                        //.Select(b => b.TimeSlot)
@@ -287,6 +282,7 @@ namespace AlleyCatBarbers.Controllers
                 // Convert booked times to strings for comparison
                 var bookedTimeSlots = bookings.Select(b => b.TimeSlot.ToString()).ToList();
 
+                // Remove current booking time from BookedTimeSlots so it is still available
                 if (!string.IsNullOrEmpty(currentBookingTimeSlot))
                 {
                     bookedTimeSlots.Remove(currentBookingTimeSlot);
@@ -295,11 +291,10 @@ namespace AlleyCatBarbers.Controllers
                 // Remove booked time slots from the list of all time slots
                 var availableTimeSlots = allTimeSlots.Except(bookedTimeSlots, StringComparer.OrdinalIgnoreCase).ToList();
 
-                // Logging for debugging
                 _logger.LogInformation("Booked Time Slots: {TimeSlots}", string.Join(", ", bookedTimeSlots));
                 _logger.LogInformation("Available Time Slots: {TimeSlots}", string.Join(", ", availableTimeSlots));
 
-                // Return available time slots as JSON
+                // Return available time slots
                 return Ok(availableTimeSlots);
             }
             catch (Exception ex)

@@ -1,13 +1,58 @@
-html {
-    font-size: 14px;
-    color: white;
+/* Base Body Styles */
+body {
+    background-color: #1e1e1e;
+    color: #dcdcdc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
 }
 
-@media (min-width:768px) {
-    html {
-        font-size: 16px
-    }
+/* Container for Centering Content */
+.container {
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
 }
+
+/* Navbar Styles */
+.navbar {
+    background-color: #2c2c2c;
+    border-bottom: 1px solid #3a3a3a;
+    width: 100%;
+    text-align: center;
+}
+
+.navbar-brand {
+    color: #ffffff !important;
+    margin-right: 0; /* Center the brand logo */
+}
+
+.navbar-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.nav-item {
+    margin: 0 15px; /* Space out the nav items */
+}
+
+.navbar-nav .nav-link {
+    color: #ffffff !important;
+}
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        color: #61dafb !important;
+    }
 
 /* Buttons */
 .btn-primary {
@@ -33,56 +78,19 @@ html {
         border-color: #606060;
     }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 .1rem white,0 0 0 .25rem #258cfb
-}
-
-html {
-    position: relative;
-    min-height: 100%
-}
-
-body {
-    background-color: #1e1e1e;
-    color: #dcdcdc;
-    /*font-family: "Roboto Flex", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 550;
-    font-style: normal;
-    font-variation-settings: "slnt" 0, "wdth" 100, "GRAD" 0, "XOPQ" 96, "XTRA" 468, "YOPQ" 79, "YTAS" 750, "YTDE" -203, "YTFI" 738, "YTLC" 514, "YTUC" 712;*/
-}
-
-.navbar {
-    background-color: #2c2c2c;
-}
-
-.navbar-nav .nav-link {
-    color: #ffffff !important;
-}
-
-    .navbar-nav .nav-link:hover,
-    .navbar-nav .nav-link.active {
-        color: #61dafb !important;
-    }
-
-#spinner {
-    display: block;
-}
-
-.ui-datepicker-unselectable .ui-state-disabled {
-    text-decoration: line-through;
-    color: #c0c0c0; /* Lighter color for disabled dates */
-}
-
-
 /* Form Controls */
+input[type="text"],
+input[type="email"],
+input[type="password"],
 textarea,
 select {
     background-color: #2c2c2c;
     color: #dcdcdc;
     border: 1px solid #4a4a4a;
+    padding: 0.5rem;
     border-radius: 4px;
-
+    margin-bottom: 1rem;
+    width: 100%;
 }
 
     input[type="text"]:focus,
@@ -99,7 +107,7 @@ select {
 .table {
     color: #dcdcdc;
     background-color: #2c2c2c;
- 
+    margin: 0 auto;
 }
 
     .table thead th {
@@ -122,7 +130,9 @@ select {
     border: 1px solid #3a3a3a;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    
+    margin: 0 auto 1rem auto;
+    width: 100%;
+    max-width: 600px;
 }
 
 .card-header {
@@ -140,7 +150,9 @@ select {
     background-color: #3a3a3a;
     color: #ffffff;
     border: 1px solid #4a4a4a;
-   
+    margin: 0 auto 1rem auto;
+    max-width: 600px;
+    text-align: center;
 }
 
 .alert-success {
@@ -163,6 +175,32 @@ select {
     border-color: #3c9f9f;
 }
 
+/* Footer */
+footer {
+    background-color: #2c2c2c;
+    color: #dcdcdc;
+    padding: 1rem 0;
+    border-top: 1px solid #3a3a3a;
+    text-align: center;
+    width: 100%;
+}
+
+/* Links */
+a {
+    color: #61dafb;
+    text-decoration: none;
+}
+
+    a:hover {
+        color: #4aaee6;
+        text-decoration: underline;
+    }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
 ::-webkit-scrollbar-track {
     background: #2c2c2c;
 }
@@ -176,11 +214,7 @@ select {
         background: #61dafb;
     }
 
-footer {
-    background-color: #2c2c2c;
-    color: #dcdcdc;
-    padding: 1rem 0;
-    border-top: 1px solid #3a3a3a;
-    text-align: center;
-    width: 100%;
+/* Transitions */
+* {
+    transition: all 0.3s ease-in-out;
 }

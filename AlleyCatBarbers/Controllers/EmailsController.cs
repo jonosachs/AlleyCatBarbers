@@ -31,6 +31,7 @@ namespace AlleyCatBarbers.Controllers
                 bool EmailSent = false;
                 string Message = null;
 
+                // Send email with attachment if one is included
                 if (model.Attachment != null && model.Attachment.Length > 0)
                 {
                     using (var ms = new MemoryStream())
@@ -50,7 +51,7 @@ namespace AlleyCatBarbers.Controllers
                         emailAttachment
                         );
                 }
-                else
+                else // Otherwise send email without attachment
                 {
                     (EmailSent, Message) = await _emailSender.SendEmailAsync(
                         model.To,
@@ -59,6 +60,7 @@ namespace AlleyCatBarbers.Controllers
                         );
                 }
 
+                // Parse email success or failure messages to ViewBag
                 if (EmailSent)
                 {
                     ViewBag.EmailSent = true;

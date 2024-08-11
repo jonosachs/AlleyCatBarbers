@@ -21,21 +21,31 @@
 }
 else
 {
+    // Show full and half stars to accompany rating scores
+    int fullStars = (int)Math.Floor(Model.AverageRating);
+    bool hasHalfStar = (Model.AverageRating - fullStars) >= 0.5;
+
     <div class="pb-2">
         <h5>
             Average: @Model.AverageRating/5
-            @for (int i = 0; i < @Model.AverageRating; i++)
+            @for (int i = 0; i < fullStars; i++)
             {
-                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i> <!-- Full star -->
+            }
+            @if (hasHalfStar)
+            {
+                <i class="fas fa-star-half-alt"></i> <!-- Half star -->
             }
         </h5>
     </div>
+
 
 
     <div class="container mt-4">
         <table id="reviewTable" class="table dt-responsive nowrap" style="width:100%">
             <thead>
                 <tr>
+                    <th></th>
                     <th></th>
                 </tr>
             </thead>
@@ -60,6 +70,15 @@ else
                                     </p>
                                 </div>
                             </div>
+                        </td>
+                        <td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                
+                                <form asp-action="Delete" asp-route-id="@review.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            }
                         </td>
                     </tr>
                 }

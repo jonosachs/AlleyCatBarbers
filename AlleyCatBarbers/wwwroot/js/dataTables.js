@@ -12,6 +12,7 @@
                 searching: true,
                 info: true,
                 autoWidth: false,
+                
             });
 
             userTable.columns.adjust().responsive.recalc(); // Trigger size recalc to adjust to window
